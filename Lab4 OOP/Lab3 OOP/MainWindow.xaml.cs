@@ -306,12 +306,13 @@ namespace Lab3_OOP
 
         private void focus_follow(object sender, EventArgs args)
         {
-            Application.Current.Dispatcher.Invoke(delegate
+            
             {
                 Car car = (Car)sender;
-                indi.Value = 100 * car.pos / car.route.Count;
+                indi.Value =  100 * car.pos / car.route.Count;
                 Map.Position = car.getFocus();
-            });
+                
+            }
         }
 
             private void Button_CallTaxi_Click(object sender, RoutedEventArgs e)
@@ -325,7 +326,7 @@ namespace Lab3_OOP
                 if (mapObject is Car someCar && someCar.getDistance(taxiClient.getFocus()) < distanceToNearestCar)
                 {
                     taxiCar = someCar;
-                    someCar.Follow += focus_follow;
+                    //someCar.Follow += focus_follow;
                 }
             }
             if (taxiCar != null)
@@ -345,6 +346,7 @@ namespace Lab3_OOP
             {
                 MessageBox.Show("Нет машин");
             }
+            taxiCar.Follow += focus_follow;
 
         }
     }

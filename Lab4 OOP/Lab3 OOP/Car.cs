@@ -36,6 +36,7 @@ namespace Lab3_OOP
             this.point = point;
             this.passengers = new List<Human>();
             //this.route = new List<PointLatLng>();
+
         }
 
         public override double getDistance(PointLatLng point)
@@ -47,6 +48,7 @@ namespace Lab3_OOP
             // вычисление расстояния между точками в метрах
             double distance = c1.GetDistanceTo(c2);
             return distance;
+
         }
 
         public override PointLatLng getFocus()
@@ -66,6 +68,7 @@ namespace Lab3_OOP
                     ToolTip = this.getTitle(), // всплывающая подсказка
                     Source = new BitmapImage(new Uri("pack://application:,,,/imgs/car.png")), // картинка
                     RenderTransform = new TranslateTransform { X = -14, Y = -14 }
+
                 }
             };
             return marker;
@@ -84,13 +87,15 @@ namespace Lab3_OOP
              false, // режим пешехода (false - выключен)
              15);
             // получение точек маршрута
+            
             this.route = route.Points;
             var route1 = new Route("v",route.Points);
-
+            
             //начать движение
             Thread newThread = new Thread(new ThreadStart(moveByRoute));
             newThread.Start();
             return route1;
+
         }
 
         public void passengerSeated(object sender, EventArgs e)
@@ -98,6 +103,7 @@ namespace Lab3_OOP
             //посадить пассажира в машину и начать движение по маршруту
             if (sender is Human passenger)
             {
+                
                 this.passengers.Add(passenger);
             }
             if (passengers.Count() > 0)
@@ -108,12 +114,14 @@ namespace Lab3_OOP
         }
 
         public int pos = 0;
+
         private void moveByRoute()
         {
             foreach (var point in route)
             {
-                
+               
                 {
+
                     // вычисление разницы между двумя соседними точками по широте и долготе
                     double latDiff = point.Lat - this.point.Lat;
                     double lngDiff = point.Lng - this.point.Lng;
@@ -121,34 +129,41 @@ namespace Lab3_OOP
                     //latDiff и lngDiff - катеты прямоугольного треугольника
                     double angle = Math.Atan2(lngDiff, latDiff) * 180.0 / Math.PI;
 
-                    pos += 1;
+                  
 
                     this.point = point;
-
+                    Application.Current.Dispatcher.Invoke(delegate
                     {
                         // установка угла поворота маркера
                         TransformGroup transform = new TransformGroup();
                         transform.Children.Add(new RotateTransform { Angle = angle - 90.0, CenterX = 14, CenterY = 14 });
                         transform.Children.Add(new TranslateTransform { X = -14, Y = -14 });
                         MainWindow.marker_taxiCar.Shape.RenderTransform = transform;
+
                         //MainWindow.marker_taxiCar.Shape.RenderTransform = new RotateTransform { Angle = angle - 90.0, CenterX = 14, CenterY = 14 };
                         //MainWindow.marker_taxiCar.Shape.RenderTransform = new TranslateTransform { X = -14, Y = -14 };
                         MainWindow.marker_taxiCar.Position = this.point;
                         MainWindow.map.Position = this.point;
+
                         //добавить перемещение пассажиров
                         foreach (Human passenger in passengers)
                         {
+                            pos += 1;
                             passenger.moveTo(this.point);
                             MainWindow.marker_taxiClient.Position = passenger.getFocus();
-                        }
+                            Follow?.Invoke(this, EventArgs.Empty);
 
-                    }
-                };
+                        }
+                        
+
+                    });
+                }
                 Thread.Sleep(250);
             }
 
             if (passengers.Count() > 0)
             {
+                
                 MessageBox.Show("Такси приехало в пункт назначения");
             }
 
@@ -158,7 +173,7 @@ namespace Lab3_OOP
             route.Clear();
             // отправка события о прибытии после достижения последней точки маршрута
             Arrived?.Invoke(this, null);
-            Follow?.Invoke(this, EventArgs.Empty);
+            
         }
     }
 }
